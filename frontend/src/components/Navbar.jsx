@@ -3,18 +3,29 @@ import { assets } from "../assets/assets";
 import { Menu, X } from "lucide-react";
 import { NavLink, Link } from "react-router-dom"; // Import Link for the Cart and for the logo
 import { ShopContext } from "../context/ShopContext";
+import ConfirmationModal from './ConfirmationModal'; // Import the ConfirmationModal
 
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false); // State for the menu
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for the dropdown menu
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state for confirmation
 
-  const logout=()=>{
+  const logout = () => {
+    setIsModalOpen(true); // Show the modal for confirmation
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.removeItem('token');
     setToken('');
     setCartItems({});
     navigate('/login');
-  }
+    setIsModalOpen(false); // Close the modal after confirming logout
+  };
+
+  const handleLogoutCancel = () => {
+    setIsModalOpen(false); // Close the modal if the user cancels
+  };
 
   const { setShowSearch, getCartCount,navigate,token,setToken,setCartItems } = useContext(ShopContext);
 
@@ -26,6 +37,8 @@ const Navbar = () => {
   const handleProfileLeave = () => {
     setIsDropdownOpen(false);
   };
+
+  
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
@@ -206,6 +219,12 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onConfirm={handleLogoutConfirm}
+        onCancel={handleLogoutCancel}
+      />
     </nav>
   );
 };

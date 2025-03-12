@@ -6,49 +6,63 @@ import { toast } from 'react-toastify';
 const Login = () => {
 
   const [currentState, setCurrentState] = useState('Login');
-  const {token , setToken , navigate , backendUrl} =useContext(ShopContext);
+  const { token, setToken, navigate, backendUrl } = useContext(ShopContext);
 
-  const [name,setName]=useState('');
-  const [password,setPassword]=useState('');
-  const [email,setEmail]=useState('');
-
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     try {
-      
       if (currentState === 'Sign Up') {
-          const response = await axios.post(backendUrl + '/api/user/register',{name,email,password})
+        // Sign Up logic
+        const response = await axios.post(backendUrl + '/api/user/register', { name, email, password });
         if (response.data.success) {
-          setToken(response.data.token);
-          localStorage.setItem('token',response.data.token);
+          toast.success('Account created successfully!');
+          // Navigate to login page after successful signup
+          setCurrentState('Login');
+          // Clear input fields after signup
+          setName('');
+          setEmail('');
+          setPassword('');
+          navigate('/login'); // Redirect to login page
+        } else {
+          toast.error(response.data.message);
         }
-        else{
+      } else {
+        // Login logic
+        const response = await axios.post(backendUrl + '/api/user/login', { email, password });
+        if (response.data.success) {
+          // Save token to localStorage and update context
+          setToken(response.data.token);
+          localStorage.setItem('token', response.data.token);
+          toast.success('Logged in successfully!');
+          navigate('/'); // Redirect to the home page or dashboard
+        } else {
           toast.error(response.data.message);
         }
       }
-      else{
-        const response = await axios.post(backendUrl + '/api/user/login', {email,password})
-        if (response.data.success) {
-          setToken(response.data.token);
-          localStorage.setItem('token',response.data.token);
-        }
-        else{
-          toast.error(response.data.message);
-        }
-      }
-
     } catch (error) {
       console.log(error);
       toast.error(error.message);
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     if (token) {
-      navigate('/')
+      navigate('/');
     }
-  },[token])
+  }, [token, navigate]);
+
+  useEffect(() => {
+    // Clear input fields when switching to Login
+    if (currentState === 'Login') {
+      setName('');
+      setEmail('');
+      setPassword('');
+    }
+  }, [currentState]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white">
@@ -65,7 +79,7 @@ const Login = () => {
         {/* Conditional Name Field */}
         {currentState === 'Login' ? '' : 
           <input
-            onChange={(e)=>setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             value={name}
             type="text"
             className="w-full px-4 py-3 mb-6 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-600 transition-all duration-300 transform hover:scale-105"
@@ -76,16 +90,16 @@ const Login = () => {
 
         {/* Email and Password Fields */}
         <input
-        onChange={(e)=>setEmail(e.target.value)}
-        value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          value={email}
           type="email"
           className="w-full px-4 py-3 mb-6 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-600 transition-all duration-300 transform hover:scale-105"
           placeholder="Email"
           required
         />
         <input
-        onChange={(e)=>setPassword(e.target.value)}
-        value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          value={password}
           type="password"
           className="w-full px-4 py-3 mb-6 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-600 transition-all duration-300 transform hover:scale-105"
           placeholder="Password"
@@ -111,4 +125,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Login;
