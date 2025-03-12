@@ -9,24 +9,36 @@ const Cart = () => {
 
   const [cartData, setCartData] = useState([]);
 
+  // Retrieve cart data from localStorage when the component mounts
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem('cartItems')); // Retrieve the cart data
+    if (storedCart) {
+      // If there's data in localStorage, set it as the initial cart data
+      setCartData(storedCart);
+    }
+  }, []);
+
+  // Update cartData when cartItems changes and save it to localStorage
   useEffect(() => {
     if (products.length > 0) {
       const tempData = [];
-    for (const items in cartItems) {
-      for (const item in cartItems[items]) {
-        if (cartItems[items][item] > 0) {
-          tempData.push({
-            _id: items,
-            size: item,
-            quantity: cartItems[items][item],
-          });
+      for (const items in cartItems) {
+        for (const item in cartItems[items]) {
+          if (cartItems[items][item] > 0) {
+            tempData.push({
+              _id: items,
+              size: item,
+              quantity: cartItems[items][item],
+            });
+          }
         }
       }
+      setCartData(tempData);
+
+      // Save the updated cart data to localStorage
+      localStorage.setItem('cartItems', JSON.stringify(tempData));
     }
-    setCartData(tempData);
-    }
-    
-  }, [cartItems,products]);
+  }, [cartItems, products]);
 
   return (
     <div className="bg-gradient-to-t from-gray-100 via-white to-gray-100 min-h-screen py-12 px-4 sm:px-8 pt-24">

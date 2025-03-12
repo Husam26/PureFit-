@@ -11,7 +11,11 @@ const ShopContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItems, setCartItems] = useState({});
+  const [cartItems, setCartItems] = useState(() => {
+    // Try to load cartItems from localStorage on component mount
+    const savedCart = localStorage.getItem("cartItems");
+    return savedCart ? JSON.parse(savedCart) : {}; // If no cartItems in localStorage, initialize with an empty object
+  });
   const [userId, setUserId] = useState(null);
   const [products, setProducts] = useState([]);
   const [token, setToken] = useState("");
@@ -25,6 +29,13 @@ const ShopContextProvider = (props) => {
       setUserId(storedUserId);
     }
   }, []);
+
+  // Save cart items to localStorage whenever cartItems changes
+  useEffect(() => {
+    if (Object.keys(cartItems).length > 0) {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems)); // Save cart to localStorage
+    }
+  }, [cartItems]);
 
   const addToCart = async (itemId, size) => {
     // Clone the current cart items state
