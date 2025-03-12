@@ -1,18 +1,20 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import RelatedProduct from '../components/RelatedProduct';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency,addToCart,userId} = useContext(ShopContext);
+  const { products, currency, addToCart, userId } = useContext(ShopContext);
   const [productData, setProductData] = useState(false);
   const [images, setImage] = useState('');
-  const [size, setSize] = useState("");
+  const [size, setSize] = useState('');
 
   const fetchProductData = () => {
-    const foundProduct = products.find((item) => item._id === productId); // More efficient
+    const foundProduct = products.find((item) => item._id === productId);
     if (foundProduct) {
       setProductData(foundProduct);
       setImage(foundProduct.images[0]);
@@ -23,21 +25,37 @@ const Product = () => {
     fetchProductData();
   }, [productId, products]);
 
+  const handleAddToCart = () => {
+    if (!size) {
+      toast.error('Please select a size before adding to cart!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      return;
+    }
+    
+    addToCart(productData._id, size);
+    toast.success(`${productData.name} added to cart!`, {
+      position: 'top-right',
+      autoClose: 3000,
+    });
+  };
+
   return productData ? (
     <div className="pt-24 border-t-2 transition-opacity ease-in duration-500 opacity-100">
+      <ToastContainer />
       {/* Product Image and Info */}
       <div className="flex gap-8 sm:gap-12 flex-col sm:flex-row items-center sm:items-start">
-
         {/* Product Images */}
         <div className="flex-1 flex flex-col-reverse sm:flex-row gap-3 sm:w-[40%]">
           {/* Thumbnail images */}
           <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-auto gap-2 sm:gap-3 sm:w-[18%] w-full">
             {productData.images.map((item, index) => (
-              <img 
-                onClick={() => setImage(item)} 
-                src={item} 
-                key={index} 
-                className="w-[70px] sm:w-[100px] sm:h-[100px] object-cover cursor-pointer rounded-md hover:opacity-75 transition" 
+              <img
+                onClick={() => setImage(item)}
+                src={item}
+                key={index}
+                className="w-[70px] sm:w-[100px] sm:h-[100px] object-cover cursor-pointer rounded-md hover:opacity-75 transition"
                 alt={productData.name}
               />
             ))}
@@ -53,12 +71,7 @@ const Product = () => {
           <h1 className="font-medium text-2xl sm:text-3xl mt-2">{productData.name}</h1>
           <div className="flex items-center gap-1 mt-2">
             {Array.from({ length: 5 }, (_, index) => (
-              <img 
-                key={index} 
-                src={index < 4 ? assets.star_icon : assets.star_dull_icon} 
-                alt="star" 
-                className="w-4 h-4"
-              />
+              <img key={index} src={index < 4 ? assets.star_icon : assets.star_dull_icon} alt="star" className="w-4 h-4" />
             ))}
             <p className="pl-2 text-sm">(122 reviews)</p>
           </div>
@@ -70,10 +83,11 @@ const Product = () => {
             <p className="text-lg font-medium">Select Size</p>
             <div className="flex gap-3">
               {productData.sizes.map((item, index) => (
-                <button 
+                <button
                   key={index}
-                  onClick={() => setSize(item)} 
-                  className={`border py-2 px-6 bg-gray-100 rounded-lg transition-colors ${item === size ? 'border-orange-500 bg-orange-100' : 'hover:bg-gray-200'}`}>
+                  onClick={() => setSize(item)}
+                  className={`border py-2 px-6 bg-gray-100 rounded-lg transition-colors ${item === size ? 'border-orange-500 bg-orange-100' : 'hover:bg-gray-200'}`}
+                >
                   {item}
                 </button>
               ))}
@@ -81,7 +95,10 @@ const Product = () => {
           </div>
 
           {/* Add to Cart Button */}
-          <button onClick={()=>addToCart(productData._id,size)} className="bg-black text-white px-8 py-3 text-sm w-full sm:w-auto mt-4 rounded-lg hover:bg-gray-700 transition duration-300">
+          <button
+            onClick={handleAddToCart}
+            className="bg-black text-white px-8 py-3 text-sm w-full sm:w-auto mt-4 rounded-lg hover:bg-gray-700 transition duration-300"
+          >
             ADD TO CART
           </button>
 
@@ -109,7 +126,9 @@ const Product = () => {
       {/* Related Products Section */}
       <RelatedProduct category={productData.category} subCategory={productData.subCategory} />
     </div>
-  ) : <div className='opacity-0'></div>
+  ) : (
+    <div className="opacity-0"></div>
+  );
 };
 
 export default Product;
